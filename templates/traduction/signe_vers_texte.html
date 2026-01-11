@@ -1,0 +1,1100 @@
+{% extends 'base.html' %}
+
+{% block title %}Signe → Texte - LSF Connect{% endblock %}
+
+{% block content %}
+<div class="translation-container">
+    <h2><i class="fas fa-sign-language"></i> Traduction Signe → Texte/Voix</h2>
+    <p class="subtitle">Traduisez vos signes en temps réel ou via une vidéo uploadée</p>
+    
+    <!-- Mode sélection -->
+    <div class="mode-selector">
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="camera">
+                <i class="fas fa-camera"></i> Mode Webcam
+            </button>
+            <button class="mode-tab" data-mode="upload">
+                <i class="fas fa-upload"></i> Mode Upload
+            </button>
+        </div>
+    </div>
+    
+    <!-- Section Webcam -->
+    <div id="camera-mode" class="mode-section active">
+        <div class="camera-container">
+            <div class="camera-preview">
+                <video id="webcam" autoplay playsinline></video>
+                <div class="camera-overlay">
+                    <div class="translation-display">
+                        <div class="translation-text" id="live-translation">
+                            Votre traduction apparaîtra ici...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="camera-controls">
+                    <button id="start-camera" class="btn btn-success">
+                        <i class="fas fa-play"></i> Démarrer la caméra
+                    </button>
+                    <button id="stop-camera" class="btn btn-danger" disabled>
+                        <i class="fas fa-stop"></i> Arrêter
+                    </button>
+                    <button id="capture-photo" class="btn btn-primary" disabled>
+                        <i class="fas fa-camera"></i> Capturer
+                    </button>
+                    <button id="record-video" class="btn btn-warning" disabled>
+                        <i class="fas fa-video"></i> Enregistrer
+                    </button>
+                </div>
+            </div>
+            
+            <div class="camera-sidebar">
+                <h4>Instructions :</h4>
+                <ul class="instructions">
+                    <li><i class="fas fa-lightbulb"></i> Assurez-vous d'avoir un bon éclairage</li>
+                    <li><i class="fas fa-hands"></i> Placez vos mains dans le cadre</li>
+                    <li><i class="fas fa-user"></i> Restez face à la caméra</li>
+                    <li><i class="fas fa-clock"></i> Faites des signes lents et clairs</li>
+                </ul>
+                
+                <div class="status-indicator">
+                    <h5>Statut : <span id="camera-status">Prêt</span></h5>
+                    <div class="status-dot" id="status-dot"></div>
+                </div>
+                
+                <div class="recent-translations">
+                    <h5>Traductions récentes :</h5>
+                    <div id="translations-list">
+                        <div class="empty-state">
+                            <i class="fas fa-comment"></i>
+                            <p>Aucune traduction encore</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Section Upload -->
+    <div id="upload-mode" class="mode-section">
+        <div class="upload-container">
+            <div class="upload-options">
+                <div class="upload-card" id="drag-drop-zone">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h4>Glisser-Déposer</h4>
+                    <p>Glissez votre fichier vidéo ici</p>
+                    <p class="file-types">Formats: MP4, AVI, MOV, WEBM</p>
+                    <input type="file" id="file-input" accept="video/*" hidden>
+                </div>
+                
+                <div class="upload-card" id="browse-btn">
+                    <div class="upload-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h4>Parcourir</h4>
+                    <p>Choisir un fichier depuis votre ordinateur</p>
+                    <button class="btn btn-outline">Sélectionner un fichier</button>
+                </div>
+            </div>
+            
+            <div class="video-preview-section" id="video-preview-section" style="display: none;">
+                <h4>Aperçu de la vidéo :</h4>
+                <div class="video-player">
+                    <video id="uploaded-video" controls>
+                        Votre navigateur ne supporte pas la lecture vidéo.
+                    </video>
+                </div>
+                
+                <div class="video-info">
+                    <div class="info-item">
+                        <span class="info-label">Nom :</span>
+                        <span id="video-name">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Taille :</span>
+                        <span id="video-size">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Durée :</span>
+                        <span id="video-duration">-</span>
+                    </div>
+                </div>
+                
+                <button id="process-video" class="btn btn-primary btn-lg">
+                    <i class="fas fa-magic"></i> Traduire cette vidéo
+                </button>
+            </div>
+            
+            <div class="processing-section" id="processing-section" style="display: none;">
+                <div class="processing-animation">
+                    <div class="spinner"></div>
+                    <h4>Traitement en cours...</h4>
+                    <p id="processing-message">Analyse des signes...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">0%</div>
+                </div>
+            </div>
+            
+            <div class="result-section" id="upload-result-section" style="display: none;">
+                <h4>Résultat de la traduction :</h4>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h5>Texte traduit :</h5>
+                        <div class="result-actions">
+                            <button class="btn btn-sm btn-outline" id="copy-text">
+                                <i class="fas fa-copy"></i> Copier
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="text-to-speech">
+                                <i class="fas fa-volume-up"></i> Écouter
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="save-result">
+                                <i class="fas fa-save"></i> Sauvegarder
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="result-content">
+                        <p id="translated-text">Le texte traduit apparaîtra ici...</p>
+                    </div>
+                    
+                    <div class="result-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Confiance :</span>
+                            <span class="detail-value" id="result-confidence">85%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Temps de traitement :</span>
+                            <span class="detail-value" id="processing-time">2.5s</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Mots détectés :</span>
+                            <span class="detail-value" id="words-detected">5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="translate-another">
+                        <i class="fas fa-redo"></i> Traduire une autre vidéo
+                    </button>
+                    <a href="{% url 'tutoriel:catalogue' %}" class="btn btn-secondary">
+                        <i class="fas fa-graduation-cap"></i> Apprendre plus de signes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les paramètres de la caméra -->
+<div class="modal" id="camera-settings-modal">
+    <div class="modal-content">
+        <h3>Paramètres de la caméra</h3>
+        <div class="camera-select">
+            <label for="camera-select">Choisir la caméra :</label>
+            <select id="camera-select" class="form-control"></select>
+        </div>
+        <div class="resolution-select">
+            <label for="resolution-select">Résolution :</label>
+            <select id="resolution-select" class="form-control">
+                <option value="640x480">640x480 (SD)</option>
+                <option value="1280x720" selected>1280x720 (HD)</option>
+                <option value="1920x1080">1920x1080 (Full HD)</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="apply-settings">Appliquer</button>
+            <button class="btn btn-secondary" id="close-settings">Annuler</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.translation-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+
+.subtitle {
+    color: #666;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+/* Mode Selector */
+.mode-selector {
+    margin-bottom: 2rem;
+}
+
+.mode-tabs {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.mode-tab {
+    padding: 1rem 2rem;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mode-tab.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.mode-tab:hover:not(.active) {
+    background: #e0e0e0;
+}
+
+/* Mode Sections */
+.mode-section {
+    display: none;
+}
+
+.mode-section.active {
+    display: block;
+}
+
+/* Camera Mode */
+.camera-container {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.camera-preview {
+    flex: 2;
+    min-width: 300px;
+}
+
+#webcam {
+    width: 100%;
+    height: 500px;
+    background: #000;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.camera-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 1rem;
+    border-radius: 10px 10px 0 0;
+}
+
+.translation-display {
+    text-align: center;
+}
+
+.translation-text {
+    font-size: 1.5rem;
+    min-height: 60px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+.confidence-bar {
+    width: 100%;
+    height: 10px;
+    background: #333;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573);
+    width: 0%;
+    transition: width 0.5s;
+}
+
+.confidence-text {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.camera-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.camera-controls .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+.camera-sidebar {
+    flex: 1;
+    min-width: 250px;
+}
+
+.instructions {
+    list-style: none;
+    padding: 0;
+}
+
+.instructions li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.instructions i {
+    color: var(--primary-color);
+}
+
+.status-indicator {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.status-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ff4757;
+    display: inline-block;
+    margin-left: 1rem;
+}
+
+.status-dot.active {
+    background: #2ed573;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.recent-translations {
+    margin-top: 2rem;
+}
+
+.recent-translations h5 {
+    margin-bottom: 1rem;
+}
+
+#translations-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #ccc;
+}
+
+/* Upload Mode */
+.upload-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.upload-options {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.upload-card {
+    flex: 1;
+    min-width: 250px;
+    padding: 2rem;
+    border: 2px dashed #ddd;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-card:hover {
+    border-color: var(--primary-color);
+    background: #f8f9fa;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.file-types {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.video-preview-section, .processing-section, .result-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.video-player {
+    margin: 1rem 0;
+}
+
+#uploaded-video {
+    width: 100%;
+    max-height: 400px;
+    border-radius: 10px;
+}
+
+.video-info {
+    display: flex;
+    gap: 2rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.info-item {
+    flex: 1;
+    min-width: 150px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.processing-animation {
+    text-align: center;
+    padding: 3rem;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 2rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4a6fa5, #4fc3a1);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.result-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1.5rem;
+    background: #f8f9fa;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.result-content {
+    margin-bottom: 1.5rem;
+}
+
+#translated-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    padding: 1rem;
+    background: white;
+    border-radius: 5px;
+    min-height: 100px;
+}
+
+.result-details {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.detail-item {
+    flex: 1;
+    min-width: 150px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #666;
+    display: block;
+}
+
+.detail-value {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .camera-container {
+        flex-direction: column;
+    }
+    
+    #webcam {
+        height: 300px;
+    }
+    
+    .upload-options {
+        flex-direction: column;
+    }
+    
+    .upload-card {
+        min-width: 100%;
+    }
+    
+    .camera-controls .btn {
+        min-width: calc(50% - 0.5rem);
+    }
+    
+    .result-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables globales
+    let mediaStream = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+    let translationInterval = null;
+    
+    // Éléments DOM
+    const modeTabs = document.querySelectorAll('.mode-tab');
+    const modeSections = document.querySelectorAll('.mode-section');
+    const webcam = document.getElementById('webcam');
+    const startCameraBtn = document.getElementById('start-camera');
+    const stopCameraBtn = document.getElementById('stop-camera');
+    const captureBtn = document.getElementById('capture-photo');
+    const recordBtn = document.getElementById('record-video');
+    const cameraStatus = document.getElementById('camera-status');
+    const statusDot = document.getElementById('status-dot');
+    const liveTranslation = document.getElementById('live-translation');
+    const confidenceLevel = document.getElementById('confidence-level');
+    const confidenceText = document.getElementById('confidence-text');
+    
+    // Mode switching
+    modeTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const mode = tab.dataset.mode;
+            
+            // Update tabs
+            modeTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Update sections
+            modeSections.forEach(section => section.classList.remove('active'));
+            document.getElementById(`${mode}-mode`).classList.add('active');
+            
+            // Stop camera when switching to upload mode
+            if (mode === 'upload' && mediaStream) {
+                stopCamera();
+            }
+        });
+    });
+    
+    // Camera functionality
+    startCameraBtn.addEventListener('click', startCamera);
+    stopCameraBtn.addEventListener('click', stopCamera);
+    captureBtn.addEventListener('click', capturePhoto);
+    recordBtn.addEventListener('click', toggleRecording);
+    
+    async function startCamera() {
+        try {
+            const constraints = {
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
+                },
+                audio: false
+            };
+            
+            mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+            webcam.srcObject = mediaStream;
+            
+            // Update UI
+            startCameraBtn.disabled = true;
+            stopCameraBtn.disabled = false;
+            captureBtn.disabled = false;
+            recordBtn.disabled = false;
+            cameraStatus.textContent = 'Caméra active';
+            statusDot.classList.add('active');
+            
+            // Start simulated translation
+            startTranslationSimulation();
+            
+        } catch (error) {
+            console.error('Erreur d\'accès à la caméra:', error);
+            alert('Impossible d\'accéder à la caméra. Vérifiez les permissions.');
+        }
+    }
+    
+    function stopCamera() {
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+            webcam.srcObject = null;
+        }
+        
+        // Update UI
+        startCameraBtn.disabled = false;
+        stopCameraBtn.disabled = true;
+        captureBtn.disabled = true;
+        recordBtn.disabled = true;
+        cameraStatus.textContent = 'Caméra arrêtée';
+        statusDot.classList.remove('active');
+        
+        // Stop translation simulation
+        stopTranslationSimulation();
+    }
+    
+    function capturePhoto() {
+        if (!mediaStream) return;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = webcam.videoWidth;
+        canvas.height = webcam.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(webcam, 0, 0);
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `capture-lsf-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // Add to recent translations
+        addRecentTranslation('Photo capturée', 85);
+    }
+    
+    function toggleRecording() {
+        if (!mediaStream) return;
+        
+        if (!isRecording) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    }
+    
+    function startRecording() {
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(mediaStream);
+        
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+        
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `enregistrement-lsf-${new Date().getTime()}.webm`;
+            link.href = url;
+            link.click();
+            
+            // Add to recent translations
+            addRecentTranslation('Vidéo enregistrée', 90);
+        };
+        
+        mediaRecorder.start();
+        isRecording = true;
+        recordBtn.innerHTML = '<i class="fas fa-stop"></i> Arrêter l\'enregistrement';
+        recordBtn.classList.remove('btn-warning');
+        recordBtn.classList.add('btn-danger');
+    }
+    
+    function stopRecording() {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            isRecording = false;
+            recordBtn.innerHTML = '<i class="fas fa-video"></i> Enregistrer';
+            recordBtn.classList.remove('btn-danger');
+            recordBtn.classList.add('btn-warning');
+        }
+    }
+    
+    function startTranslationSimulation() {
+        // Simulate live translation updates
+        translationInterval = setInterval(() => {
+            const sampleTranslations = [
+                { text: "Bonjour, comment allez-vous ?", confidence: 92 },
+                { text: "Je m'appelle...", confidence: 85 },
+                { text: "Merci beaucoup", confidence: 95 },
+                { text: "Au revoir", confidence: 98 },
+                { text: "Je voudrais apprendre", confidence: 80 },
+                { text: "C'est très intéressant", confidence: 87 },
+                { text: "Parlez-vous français ?", confidence: 83 },
+                { text: "Je suis heureux de vous rencontrer", confidence: 78 }
+            ];
+            
+            const randomIndex = Math.floor(Math.random() * sampleTranslations.length);
+            const translation = sampleTranslations[randomIndex];
+            
+            liveTranslation.textContent = translation.text;
+            confidenceLevel.style.width = `${translation.confidence}%`;
+            confidenceText.textContent = `Précision: ${translation.confidence}%`;
+            
+            // Add to recent translations occasionally
+            if (Math.random() > 0.7) {
+                addRecentTranslation(translation.text, translation.confidence);
+            }
+            
+        }, 3000); // Update every 3 seconds
+    }
+    
+    function stopTranslationSimulation() {
+        if (translationInterval) {
+            clearInterval(translationInterval);
+            translationInterval = null;
+        }
+        
+        liveTranslation.textContent = 'Votre traduction apparaîtra ici...';
+        confidenceLevel.style.width = '0%';
+        confidenceText.textContent = 'Précision: 0%';
+    }
+    
+    function addRecentTranslation(text, confidence) {
+        const translationsList = document.getElementById('translations-list');
+        
+        // Remove empty state if present
+        const emptyState = translationsList.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
+        
+        // Create new translation item
+        const translationItem = document.createElement('div');
+        translationItem.className = 'translation-item';
+        translationItem.innerHTML = `
+            <div class="translation-text">${text}</div>
+            <div class="translation-confidence">${confidence}%</div>
+            <div class="translation-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        `;
+        
+        // Add styles
+        translationItem.style.cssText = `
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
+        
+        // Add to top of list
+        translationsList.insertBefore(translationItem, translationsList.firstChild);
+        
+        // Limit to 5 items
+        const items = translationsList.querySelectorAll('.translation-item');
+        if (items.length > 5) {
+            items[items.length - 1].remove();
+        }
+    }
+    
+    // Upload functionality
+    const dragDropZone = document.getElementById('drag-drop-zone');
+    const browseBtn = document.getElementById('browse-btn');
+    const fileInput = document.getElementById('file-input');
+    const videoPreviewSection = document.getElementById('video-preview-section');
+    const uploadedVideo = document.getElementById('uploaded-video');
+    const processVideoBtn = document.getElementById('process-video');
+    const processingSection = document.getElementById('processing-section');
+    const uploadResultSection = document.getElementById('upload-result-section');
+    
+    // Drag and drop
+    dragDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dragDropZone.style.borderColor = '#4a6fa5';
+        dragDropZone.style.background = '#f8f9fa';
+    });
+    
+    dragDropZone.addEventListener('dragleave', () => {
+        dragDropZone.style.borderColor = '#ddd';
+        dragDropZone.style.background = 'white';
+    });
+    
+    dragDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragDropZone.style.borderColor = '#ddd';
+        dragDropZone.style.background = 'white';
+        
+        if (e.dataTransfer.files.length) {
+            handleFileUpload(e.dataTransfer.files[0]);
+        }
+    });
+    
+    dragDropZone.addEventListener('click', () => fileInput.click());
+    browseBtn.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleFileUpload(e.target.files[0]);
+        }
+    });
+    
+    function handleFileUpload(file) {
+        // Validation
+        if (!file.type.startsWith('video/')) {
+            alert('Veuillez sélectionner un fichier vidéo');
+            return;
+        }
+        
+        if (file.size > 50 * 1024 * 1024) {
+            alert('Le fichier est trop volumineux (max 50MB)');
+            return;
+        }
+        
+        // Update file info
+        document.getElementById('video-name').textContent = file.name;
+        document.getElementById('video-size').textContent = formatFileSize(file.size);
+        
+        // Create video URL
+        const url = URL.createObjectURL(file);
+        uploadedVideo.src = url;
+        
+        // Get video duration
+        uploadedVideo.addEventListener('loadedmetadata', () => {
+            document.getElementById('video-duration').textContent = 
+                formatDuration(uploadedVideo.duration);
+        });
+        
+        // Show preview section
+        videoPreviewSection.style.display = 'block';
+        videoPreviewSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    processVideoBtn.addEventListener('click', () => {
+        // Show processing section
+        videoPreviewSection.style.display = 'none';
+        processingSection.style.display = 'block';
+        
+        // Simulate processing
+        simulateVideoProcessing();
+    });
+    
+    function simulateVideoProcessing() {
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const processingMessage = document.getElementById('processing-message');
+        
+        const messages = [
+            'Analyse des mouvements...',
+            'Reconnaissance des signes...',
+            'Traitement des gestes...',
+            'Traduction en texte...',
+            'Finalisation...'
+        ];
+        
+        let progress = 0;
+        let messageIndex = 0;
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 10;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                
+                // Show result after completion
+                setTimeout(() => {
+                    processingSection.style.display = 'none';
+                    uploadResultSection.style.display = 'block';
+                    uploadResultSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Set result data
+                    document.getElementById('translated-text').textContent = 
+                        "Bonjour, je m'appelle LSF Connect. Je suis ravi de vous rencontrer et j'espère que cette plateforme vous sera utile pour apprendre et communiquer en Langue des Signes Française.";
+                    document.getElementById('result-confidence').textContent = '87%';
+                    document.getElementById('processing-time').textContent = '3.2s';
+                    document.getElementById('words-detected').textContent = '18';
+                }, 1000);
+            }
+            
+            progressFill.style.width = `${progress}%`;
+            progressText.textContent = `${Math.round(progress)}%`;
+            
+            // Update message every 20%
+            if (progress >= (messageIndex + 1) * 20 && messageIndex < messages.length) {
+                processingMessage.textContent = messages[messageIndex];
+                messageIndex++;
+            }
+            
+        }, 200);
+    }
+    
+    // Result actions
+    document.getElementById('copy-text').addEventListener('click', () => {
+        const text = document.getElementById('translated-text').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Texte copié !');
+        });
+    });
+    
+    document.getElementById('text-to-speech').addEventListener('click', () => {
+        const text = document.getElementById('translated-text').textContent;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        speechSynthesis.speak(utterance);
+    });
+    
+    document.getElementById('save-result').addEventListener('click', () => {
+        alert('Résultat sauvegardé dans votre historique !');
+    });
+    
+    document.getElementById('translate-another').addEventListener('click', () => {
+        // Reset to upload view
+        uploadResultSection.style.display = 'none';
+        videoPreviewSection.style.display = 'block';
+        uploadedVideo.src = '';
+        fileInput.value = '';
+        document.querySelector('.mode-tab[data-mode="upload"]').click();
+    });
+    
+    // Helper functions
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        else return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+    
+    function formatDuration(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+        }
+        if (translationInterval) {
+            clearInterval(translationInterval);
+        }
+    });
+});
+</script>
+{% endblock %}

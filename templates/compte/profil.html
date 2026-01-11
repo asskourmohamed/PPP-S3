@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Mon Profil - LSF Connect{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>Mon Profil</h2>
+        <p>Gérez vos informations personnelles et vos préférences</p>
+    </div>
+    
+    <div class="profile-content">
+        <div class="profile-sidebar">
+            <div class="profile-avatar">
+                {% if user.avatar_personnalise %}
+                    <img src="{{ user.avatar_personnalise.url }}" alt="Avatar de {{ user.username }}">
+                {% else %}
+                    <div class="avatar-placeholder">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="profile-info">
+                <h3>{{ user.username }}</h3>
+                <p class="user-type">{{ user.get_type_utilisateur_display }}</p>
+                <p class="user-level">Niveau LSF : {{ user.niveau_langue_signes }}/5</p>
+                <p class="join-date">Membre depuis {{ user.date_inscription|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+        
+        <div class="profile-main">
+            <form method="post" enctype="multipart/form-data" class="profile-form">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h4>Informations personnelles</h4>
+                    {{ form|crispy }}
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                    <a href="{% url 'accueil' %}" class="btn btn-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.profile-header h2 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.profile-content {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.profile-sidebar {
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+}
+
+.profile-avatar {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.profile-avatar img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid var(--primary-color);
+}
+
+.avatar-placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 5px solid var(--primary-color);
+}
+
+.avatar-placeholder i {
+    font-size: 100px;
+    color: #ccc;
+}
+
+.profile-info {
+    text-align: center;
+}
+
+.profile-info h3 {
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.user-type {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.user-level {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.join-date {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.profile-main {
+    flex: 2;
+    min-width: 300px;
+}
+
+.form-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.form-section h4 {
+    color: var(--secondary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .profile-content {
+        flex-direction: column;
+    }
+    
+    .profile-sidebar {
+        max-width: 100%;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Inscription - LSF Connect{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Créer un compte</h2>
+    
+    <form method="post" class="auth-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {{ form|crispy }}
+        
+        <div class="form-footer">
+            <button type="submit" class="btn btn-primary btn-block">S'inscrire</button>
+            <p class="mt-3 text-center">
+                Déjà un compte ? <a href="{% url 'compte:login' %}">Se connecter</a>
+            </p>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+}
+
+.auth-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 0.75rem;
+}
+
+.form-footer {
+    margin-top: 2rem;
+}
+
+.helptext {
+    font-size: 0.9rem;
+    color: #666;
+    display: block;
+    margin-top: 0.25rem;
+}
+</style>
+{% endblock %}

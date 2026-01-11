@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Page en développement{% endblock %}
+
+{% block content %}
+<div class="construction">
+    <h2>🚧 Page en construction</h2>
+    <p>Cette fonctionnalité sera bientôt disponible.</p>
+    <a href="{% url 'accueil' %}" class="btn btn-primary">Retour à l'accueil</a>
+</div>
+
+<style>
+.construction {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.construction h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.construction p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #666;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% load static %}
+<footer class="footer">
+    <div class="container-narrow">
+        <div class="row">
+            <div class="col-lg-4 mb-5 mb-lg-0">
+                <div class="footer-logo">
+                    <img src="{% static 'images/logo.png' %}" alt="LSF Connect">
+                </div>
+                <p style="color: rgba(255, 255, 255, 0.7)">
+                    Plateforme de traduction et d'apprentissage de la Langue des Signes Française (LSF).
+                    Rapprochons les mondes grâce à la technologie.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-link">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-4 mb-5 mb-md-0">
+                <h4 class="footer-title">Fonctionnalités</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'traduction:signe_vers_texte' %}">Signe → Texte</a></li>
+                    <li><a href="{% url 'traduction:texte_vers_signe' %}">Texte → Signe</a></li>
+                    <li><a href="{% url 'tutoriel:catalogue' %}">Tutoriels LSF</a></li>
+                    <li><a href="#">Quiz interactifs</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-4 mb-5 mb-md-0">
+                <h4 class="footer-title">Ressources</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Centre d'aide</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <h4 class="footer-title">Légal</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Mentions légales</a></li>
+                    <li><a href="#">Confidentialité</a></li>
+                    <li><a href="#">CGU</a></li>
+                    <li><a href="#">Accessibilité</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2">
+                <h4 class="footer-title">Newsletter</h4>
+                <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem">
+                    Recevez nos dernières actualités et conseils.
+                </p>
+                <form class="newsletter-form">
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Votre email" required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="copyright">
+            <p>
+                &copy; {% now "Y" %} LSF Connect. Tous droits réservés. | Conçu avec ❤️ pour la communauté sourde
+            </p>
+        </div>
+    </div>
+</footer>
