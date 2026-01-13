@@ -10,8 +10,10 @@ urlpatterns = [
         template_name='compte/login.html',
         redirect_authenticated_user=True
     ), name='login'),
+    
     path('logout/', auth_views.LogoutView.as_view(
         next_page='accueil'
     ), name='logout'),
+    
     path('profil/', views.profil, name='profil'),
 ]

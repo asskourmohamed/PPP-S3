@@ -39,20 +39,28 @@
                 </li>
 
                 {% if user.is_authenticated %}
-                <!-- Profil utilisateur -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-1"></i>
-                        {{ user.username }}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'compte:profil' %}"><i class="fas fa-user me-2"></i>Mon Profil</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>Historique</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{% url 'compte:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
-                    </ul>
-                </li>
-                {% else %}
+                    <!-- Profil utilisateur -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'compte:profil' %}"><i class="fas fa-user me-2"></i>Mon Profil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>Historique</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <!-- ✅ FORMULAIRE POUR DÉCONNEXION (POST) -->
+                                <form method="post" action="{% url 'compte:logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger w-100 text-start border-0 bg-transparent" style="cursor: pointer;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
                 <!-- Boutons connexion/inscription -->
                 <li class="nav-item">
                     <a class="btn-nav btn-outline" href="{% url 'compte:login' %}">
