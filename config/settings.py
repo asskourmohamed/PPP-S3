@@ -83,7 +83,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'lsf_database',           # Nom de votre base de données
-        'USER': 'lsf_user',                    # Votre utilisateur MySQL
+        'USER': 'root',                    # Votre utilisateur MySQL
         'PASSWORD': 'root1234!',                    # Votre mot de passe MySQL
         'HOST': 'localhost',               # Ou l'adresse de votre serveur
         'PORT': '3306',                    # Port MySQL par défaut

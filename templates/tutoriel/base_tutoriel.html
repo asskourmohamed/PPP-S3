@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tutoriel.css' %}">
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="container-narrow my-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accueil' %}">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'tutoriel:catalogue' %}">Tutoriels</a></li>
+        {% block tutoriel_breadcrumb %}{% endblock %}
+    </ol>
+</nav>
+{% endblock %}

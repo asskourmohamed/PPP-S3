@@ -1,29 +1,374 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Page en développement{% endblock %}
+{% block title %}Tutoriels LSF - Apprentissage{% endblock %}
 
 {% block content %}
-<div class="construction">
-    <h2>🚧 Page en construction</h2>
-    <p>Cette fonctionnalité sera bientôt disponible.</p>
-    <a href="{% url 'accueil' %}" class="btn btn-primary">Retour à l'accueil</a>
+<div class="container-narrow py-5">
+    <!-- Header Section -->
+    <div class="row align-items-center mb-5 animate__animated animate__fadeInUp">
+        <div class="col-lg-8">
+            <h1 class="hero-title mb-3">Apprenez la Langue des Signes</h1>
+            <p class="hero-subtitle">
+                Découvrez nos tutoriels interactifs structurés par niveaux. 
+                Chaque leçon inclut des vidéos démonstratives et des quiz pour valider vos acquis.
+            </p>
+        </div>
+        <div class="col-lg-4 text-end">
+            {% if user.is_authenticated %}
+            <div class="badge bg-primary p-3">
+                <i class="fas fa-user-graduate me-2"></i>
+                <span id="progress-text">Progression: {{ user_progress }}%</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+        <div class="col-12">
+            <div class="filter-tabs">
+                <button class="filter-btn active" data-filter="all">Tous</button>
+                <button class="filter-btn" data-filter="debutant">Débutant</button>
+                <button class="filter-btn" data-filter="intermediaire">Intermédiaire</button>
+                <button class="filter-btn" data-filter="avance">Avancé</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorials Grid -->
+    <div class="row g-4">
+        {% for tutorial in tutorials %}
+        <div class="col-lg-4 col-md-6 animate__animated animate__fadeInUp" 
+             data-niveau="{% if forloop.counter0 < 2 %}debutant{% elif forloop.counter0 < 4 %}intermediaire{% else %}avance{% endif %}">
+            
+            <div class="tutorial-card">
+                <!-- Card Image -->
+                <div class="tutorial-image">
+                    {% if tutorial.image_couverture %}
+                    <img src="{{ tutorial.image_couverture.url }}" alt="{{ tutorial.titre }}" 
+                         class="img-fluid">
+                    {% else %}
+                    <div class="placeholder-image">
+                        <i class="fas fa-sign-language"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Progress Badge -->
+                    {% if user.is_authenticated and tutorial.percentage %}
+                    <div class="progress-badge">
+                        <div class="progress-circle" data-progress="{{ tutorial.percentage }}">
+                            <span class="progress-value">{{ tutorial.percentage }}%</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Body -->
+                <div class="tutorial-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h3 class="tutorial-title">{{ tutorial.titre }}</h3>
+                        <span class="badge niveau-badge 
+                            {% if forloop.counter0 < 2 %}bg-success
+                            {% elif forloop.counter0 < 4 %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            {% if forloop.counter0 < 2 %}Débutant
+                            {% elif forloop.counter0 < 4 %}Intermédiaire
+                            {% else %}Avancé{% endif %}
+                        </span>
+                    </div>
+                    
+                    <p class="tutorial-description">{{ tutorial.description|truncatewords:30 }}</p>
+                    
+                    <div class="tutorial-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-play-circle me-1"></i>
+                            {{ tutorial.nombre_lecons }} leçons
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ tutorial.duree_totale|default:0 }} min
+                        </span>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    {% if user.is_authenticated %}
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar" 
+                             role="progressbar" 
+                             style="width: {{ tutorial.percentage|default:0 }}%"
+                             aria-valuenow="{{ tutorial.percentage|default:0 }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Action Button -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <a href="{% url 'tutoriel:lecon_detail' tutorial_id=tutorial.id lecon_id=tutorial.lecons.first.id %}" 
+                           class="btn btn-primary">
+                            {% if tutorial.progression > 0 %}
+                            <i class="fas fa-play me-2"></i>Continuer
+                            {% else %}
+                            <i class="fas fa-play me-2"></i>Commencer
+                            {% endif %}
+                        </a>
+                        
+                        <span class="text-muted small">
+                            <i class="fas fa-users me-1"></i>
+                            {{ tutorial.students_count|default:"0" }} apprenants
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">Aucun tutoriel disponible</h3>
+            <p class="text-muted">Les tutoriels seront bientôt disponibles.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Learning Path Section -->
+    {% if tutorials %}
+    <div class="learning-path mt-5 animate__animated animate__fadeInUp">
+        <h3 class="section-title mb-4">Parcours d'apprentissage recommandé</h3>
+        <div class="path-steps">
+            {% for tutorial in tutorials|slice:":3" %}
+            <div class="path-step {% if forloop.first %}active{% endif %}">
+                <div class="step-number">{{ forloop.counter }}</div>
+                <div class="step-content">
+                    <h5>{{ tutorial.titre }}</h5>
+                    <p>{{ tutorial.description|truncatewords:20 }}</p>
+                </div>
+                {% if not forloop.last %}
+                <div class="step-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter tutorials
+            const filter = this.dataset.filter;
+            const tutorials = document.querySelectorAll('.col-lg-4[data-niveau]');
+            
+            tutorials.forEach(tutorial => {
+                if (filter === 'all' || tutorial.dataset.niveau === filter) {
+                    tutorial.style.display = 'block';
+                } else {
+                    tutorial.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Animate progress circles
+    document.querySelectorAll('.progress-circle').forEach(circle => {
+        const progress = circle.dataset.progress;
+        const circumference = 2 * Math.PI * 40; // radius 40
+        const offset = circumference - (progress / 100) * circumference;
+        
+        circle.style.setProperty('--progress', progress + '%');
+        circle.style.setProperty('--circumference', circumference);
+        circle.style.setProperty('--offset', offset);
+    });
+
+    // Intersection Observer for animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.tutorial-card').forEach(card => {
+        observer.observe(card);
+    });
+</script>
 
 <style>
-.construction {
-    text-align: center;
-    padding: 4rem 2rem;
-}
-
-.construction h2 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-}
-
-.construction p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    color: #666;
-}
+    .tutorial-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+    
+    .tutorial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .tutorial-image {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+    }
+    
+    .tutorial-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .placeholder-image {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+    }
+    
+    .progress-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: white;
+        border-radius: 50%;
+        padding: 5px;
+    }
+    
+    .progress-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: conic-gradient(#4CAF50 var(--progress), #eee 0%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .progress-value {
+        background: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+    
+    .tutorial-body {
+        padding: 20px;
+    }
+    
+    .tutorial-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .tutorial-description {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+    
+    .tutorial-meta {
+        display: flex;
+        gap: 15px;
+        color: #888;
+        font-size: 0.85rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .niveau-badge {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+    }
+    
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 8px 20px;
+        border: 2px solid #e0e0e0;
+        background: white;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .filter-btn.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .learning-path {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 15px;
+        padding: 30px;
+    }
+    
+    .path-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+    
+    .path-step {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 0 10px;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #667eea;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+    }
+    
+    .step-arrow {
+        color: #667eea;
+        font-size: 1.5rem;
+    }
 </style>
 {% endblock %}
