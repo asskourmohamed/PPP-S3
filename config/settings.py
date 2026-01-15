@@ -137,3 +137,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 AUTH_USER_MODEL = 'lsf_app.Utilisateur'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+# Redirection après connexion
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/compte/login/'
+LOGOUT_REDIRECT_URL = '/'
+# Pour l'utilisateur personnalisé
+AUTH_USER_MODEL = 'lsf_app.Utilisateur'
+# Configuration de session
+SESSION_COOKIE_AGE = 1209600  # 2 semaines en secondes
+SESSION_SAVE_EVERY_REQUEST = True

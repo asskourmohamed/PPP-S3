@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Utilisateur
 
+from django.contrib.auth.forms import AuthenticationForm
 class InscriptionForm(UserCreationForm):
     email = forms.EmailField(
         required=True,
@@ -45,3 +46,22 @@ class ProfilForm(forms.ModelForm):
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'niveau_langue_signes': forms.NumberInput(attrs={'class': 'form-control', 'type': 'range', 'min': '1', 'max': '5'}),
         }
+
+
+
+class ConnexionForm(AuthenticationForm):
+    username = forms.CharField(
+        label="Nom d'utilisateur",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Votre nom d\'utilisateur',
+            'autofocus': True
+        })
+    )
+    password = forms.CharField(
+        label="Mot de passe",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Votre mot de passe'
+        })
+    )

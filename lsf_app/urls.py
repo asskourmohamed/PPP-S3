@@ -6,10 +6,7 @@ app_name = 'compte'
 
 urlpatterns = [
     path('inscription/', views.inscription, name='inscription'),
-    path('login/', auth_views.LoginView.as_view(
-        template_name='compte/login.html',
-        redirect_authenticated_user=True
-    ), name='login'),
+    path('login/', views.connexion, name='login'),  # ✅ Doit pointer vers views.connexion
     path('logout/', auth_views.LogoutView.as_view(
         next_page='accueil'
     ), name='logout'),
